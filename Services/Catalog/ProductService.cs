@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AspNetMongoDB.Services
+namespace Services.Catalog
 {
     public class ProductService : IProductService
     {

@@ -1,6 +1,6 @@
-﻿using AspNetMongoDB.Services;
-using Core.Domain.Catalog;
+﻿using Core.Domain.Catalog;
 using Microsoft.AspNetCore.Mvc;
+using Services.Catalog;
 using System;
 using System.Threading.Tasks;
 

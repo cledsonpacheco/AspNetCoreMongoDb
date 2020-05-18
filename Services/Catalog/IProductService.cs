@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AspNetMongoDB.Services
+namespace Services.Catalog
 {
     public interface IProductService
     {
