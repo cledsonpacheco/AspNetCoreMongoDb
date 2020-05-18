@@ -1,4 +1,5 @@
-﻿using AspNetMongoDB.Infra;
+﻿using AspNetMongoDB.Services;
+using Core.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,8 @@ namespace AspNetMongoDB
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            InitializeAppSettings();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                .AddJsonOptions(x =>
                {
@@ -28,7 +31,8 @@ namespace AspNetMongoDB
                    x.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                });
 
-            services.AddTransient<MondoDBContext>();
+            services.AddTransient<IProductService, ProductService>();
+            services.AddTransient(typeof(IRepository<>), typeof(MongoDBRepository<>));            
 
         }
 
@@ -48,6 +52,17 @@ namespace AspNetMongoDB
             Configuration = builder.Build();
 
             app.UseMvc();
+        }
+
+
+        private void InitializeAppSettings()
+        {
+            var mongoSection = Configuration.GetSection("MongoDB");
+            var mongoHost = mongoSection.GetValue<string>("DBHost");
+            var mongoDbName = mongoSection.GetValue<string>("DBName");
+
+            AppSettings.Settings.ConnectionStrings.DbHost = mongoHost;
+            AppSettings.Settings.ConnectionStrings.DbName = mongoDbName;
         }
     }
 }

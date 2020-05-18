@@ -1,10 +1,7 @@
-﻿using AspNetMongoDB.Infra;
-using AspNetMongoDB.Models;
+﻿using AspNetMongoDB.Services;
+using Core.Domain.Catalog;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AspNetMongoDB.Controllers
@@ -12,37 +9,33 @@ namespace AspNetMongoDB.Controllers
     [Route("/api/[controller]")]
     public class ProductController : Controller
     {
-        private readonly MondoDBContext _mongoDBContext;
-        private IMongoCollection<ProductModel> productCollection;
+        private readonly IProductService _productService;
 
-        public ProductController(MondoDBContext mongoDb)
+        public ProductController(IProductService productService)
         {
-            this._mongoDBContext = mongoDb;
-            productCollection = this._mongoDBContext.database.GetCollection<ProductModel>("product");
+            this._productService = productService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var products = productCollection.AsQueryable<ProductModel>().ToList();
+            var products = await _productService.GetAllProduct();
             return Ok(products);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
-            var productId = new ObjectId(id);
-
-            var product = productCollection.AsQueryable<ProductModel>().SingleOrDefault(x => x.Id == productId);
+            var product = await _productService.GetProductById(id);
             return Ok(product);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ProductModel product)
+        public async Task<IActionResult> Post([FromBody] Product product)
         {
             try
             {
-                productCollection.InsertOne(product);
+                await _productService.InsertProduct(product);
 
                 return Ok("Insert Product successfuly");
             }
@@ -52,20 +45,13 @@ namespace AspNetMongoDB.Controllers
             }
         }
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] ProductModel product)
+        public async Task<IActionResult> Put(string id, [FromBody] Product product)
         {
             try
             {
-                var filter = Builders<ProductModel>.Filter.Eq("_id", ObjectId.Parse(id));
-
-                var update = Builders<ProductModel>.Update
-                                    .Set("ProductName", product.ProductName)
-                                    .Set("ProductDescription", product.ProductDescription)
-                                    .Set("Quantity", product.Quantity);
-
-                var result = productCollection.UpdateOne(filter, update);
+                product.Id = id;
+                await _productService.UpdateProduct(product);
 
                 return Ok("Updated Product successfuly");
             }
@@ -80,7 +66,8 @@ namespace AspNetMongoDB.Controllers
         {
             try
             {
-                productCollection.DeleteOne(Builders<ProductModel>.Filter.Eq("_id", ObjectId.Parse(id)));
+                var product = await _productService.GetProductById(id);
+                await _productService.DeleteProduct(product);
 
                 return Ok("Deleted Product successfuly");
             }

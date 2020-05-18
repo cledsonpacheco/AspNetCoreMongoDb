@@ -12,4 +12,9 @@
     <PackageReference Include="MongoDB.Driver" Version="2.10.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AppSettings\AppSettings.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+
 </Project>
